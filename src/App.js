@@ -19,29 +19,34 @@ class App extends React.Component {
     this.state = {
       input: "",
       imageUrl: "",
-      box: {},
+      boxes: [],
     }
   }
 
   calculateFaceLocation = (data) => {
-    const face = data.outputs[0].data.regions[0].region_info.bounding_box;
-    console.log("face", face);
+    const faces = data.outputs[0].data.regions;
+    console.log("face", faces);
     const image = document.getElementById("InputImage");
     const width = Number(image.width);
     const height = Number(image.height);
-    
-    const coord = {
-      leftCol: face.left_col * width,
-      topRow: face.top_row * height,
-      rightCol: width - (face.right_col * width),
-      bottomRow: height - (face.bottom_row * height)
-    }
-    console.log(coord);
-    return (coord)
+    const coords = [];
+    console.log(coords)
+    faces.forEach(face => {
+      console.log(face)
+      const info = face.region_info.bounding_box;
+      coords.push({
+        leftCol: info.left_col * width,
+        topRow: info.top_row * height,
+        rightCol: width - (info.right_col * width),
+        bottomRow: height - (info.bottom_row * height)
+      })
+    });
+    console.log("cords", coords);
+    return (coords)
   }
 
-  displayFaceBox = (box) => {
-    this.setState({box: box})
+  displayFaceBox = (boxes) => {
+    this.setState({boxes: boxes})
   }
 
   onInputChange = (event) => {
@@ -67,7 +72,7 @@ class App extends React.Component {
         <Rank/>
         <ImageLinkform onButtonSubmit={this.onButtonSubmit} 
         onInputChange={this.onInputChange}/>
-        <FaceRecognition box={this.state.box} imgUrl={this.state.imageUrl}/>
+        <FaceRecognition boxes={this.state.boxes} imgUrl={this.state.imageUrl}/>
       </div>
     );
   }

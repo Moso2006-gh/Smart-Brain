@@ -19,7 +19,7 @@ const ParticleOptions = {
         enable: true,
         outMode: "bounce",
         random: false,
-        speed: 2,
+        speed: .5,
         straight: false,
       },
       number: {
@@ -37,7 +37,7 @@ const ParticleOptions = {
       },
       size: {
         random: true,
-        value: 5,
+        value: 3,
       },
     },
     detectRetina: true,
