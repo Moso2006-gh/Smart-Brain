@@ -2,6 +2,9 @@ import React from "react";
 import "./FaceRecognition.css"
 
 const FaceRecognition = ({imgUrl, boxes}) => {
+    if(imgUrl == ""){
+        return(<></>)
+    }
     return(
         <div className="FaceReognition pv4 center ma">
             <div className="absolute mt2">
