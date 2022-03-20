@@ -11,10 +11,6 @@ import FaceRecognition  from './Components/FaceRecognition/FaceRecognition';
 import SignIn from './Components/SignIn/SignIn';
 import Register from './Components/Register/Register';
 
-const Capp = new Clarifai.App({
- apiKey: '9a3a2c9671b44e47975fe0776e83fafc'
-});
-
 class App extends React.Component {
   constructor() {
     super();
@@ -22,8 +18,22 @@ class App extends React.Component {
       input: "",
       imageUrl: "",
       boxes: [],
-      route: "signIn"
+      route: "signIn",
+      isSignedIn: false,
+      user: {
+        id: "",
+        name: "",
+        email: "",
+        password: "",
+        entries: 0,
+        joined: ""
+      }
     }
+  }
+
+  loadUser = (data) => {
+    console.log(data)
+    this.setState({user: data})
   }
 
   calculateFaceLocation = (data) => {
@@ -60,8 +70,30 @@ class App extends React.Component {
 
   onButtonSubmit = () => {
     this.setState({imageUrl: this.state.input})
-    Capp.models.predict(Clarifai.FACE_DETECT_MODEL, this.state.input)
-    .then(response => this.displayFaceBox(this.calculateFaceLocation(response)))
+    fetch("https://secure-springs-34871.herokuapp.com/imageurl", {
+      method: "post",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        input: this.state.input
+      })
+    })
+    .then(response => response.json())
+    .then(response => {
+      if(response){
+        fetch("https://secure-springs-34871.herokuapp.com/image", {
+          method: "put",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            id: this.state.user.id
+          })
+        })
+        .then(response => response.json())
+        .then(response => {
+          this.setState(Object.assign(this.state.user, {entries: response}))
+        }).catch(console.log);
+      }
+      this.displayFaceBox(this.calculateFaceLocation(response))
+    })
     .catch(err => console.log(err));
   }
 
@@ -79,19 +111,19 @@ class App extends React.Component {
         <Particles className='particles'
           options={ParticleOptionsData()}/>
         {
-          this.state.route == "home" 
+          this.state.route === "home" 
           ? <>
             <Navigation onRouteChange={this.onRouteChange}/>
             <Logo/>
-            <Rank/>
+            <Rank name={this.state.user.name} entries={this.state.user.entries}/>
             <ImageLinkform onButtonSubmit={this.onButtonSubmit} 
             onInputChange={this.onInputChange}/>
             <FaceRecognition boxes={this.state.boxes} imgUrl={this.state.imageUrl}/>
           </> 
           : (
-            this.state.route == "signIn" 
-            ? <SignIn onRouteChange={this.onRouteChange}/>
-            : <Register onRouteChange={this.onRouteChange}/>
+            this.state.route === "signIn" 
+            ? <SignIn onRouteChange={this.onRouteChange} loadUser={this.loadUser}/>
+            : <Register onRouteChange={this.onRouteChange} loadUser={this.loadUser}/>
           )
         }
       </div>

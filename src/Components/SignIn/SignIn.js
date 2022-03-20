@@ -20,7 +20,7 @@ class SignIn extends React.Component {
 
     onSubmitSignIn = () => {
         console.log(this.state);
-        fetch("http://localhost:3001/signin",{
+        fetch("https://secure-springs-34871.herokuapp.com/signin",{
             method: "post",
             headers: {"content-Type": "application/json"},
             body: JSON.stringify({
@@ -28,7 +28,13 @@ class SignIn extends React.Component {
                 password: this.state.signInPassword
             })
         })
-        this.props.onRouteChange("home");
+        .then(response => response.json())
+        .then(data => {
+            if(data.id){
+                this.props.loadUser(data)
+                this.props.onRouteChange("home");
+            }
+        })
     }
 
     render(){
